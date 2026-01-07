@@ -53,10 +53,10 @@ The system is deployed as a user-friendly web application using **Streamlit**, a
 To run this application on your local machine, follow these steps:
 
 # 1. Clone the repository (download the files)
-git clone https://github.com/your-username/your-repo-name.git
+git clone (https://github.com/HaziqHafizal/CHRONIC-KIDNEY-DISEASE-PREDICTION-APPLICATION.git)
 
 # 2. Enter the project folder
-cd your-repo-name
+cd CHRONIC-KIDNEY-DISEASE-PREDICTION-APPLICATION
 
 # 3. Install the required libraries
 pip install -r requirements.txt

@@ -8,6 +8,25 @@ import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MinMaxScaler
 
+# --- CONVERSION FUNCTIONS ---
+def convert_albumin_to_grade(value_mg_dl):
+    """Convert albumin mg/dL to 0-5 grade based on dipstick grading"""
+    if value_mg_dl < 10: return 0      # Negative
+    elif value_mg_dl < 30: return 1    # Trace
+    elif value_mg_dl < 100: return 2   # 1+
+    elif value_mg_dl < 300: return 3   # 2+
+    elif value_mg_dl < 1000: return 4  # 3+
+    else: return 5                      # 4+
+
+def convert_sugar_to_grade(value_mg_dl):
+    """Convert glucose mg/dL to 0-5 grade based on dipstick grading"""
+    if value_mg_dl < 50: return 0       # Negative
+    elif value_mg_dl < 150: return 1    # Trace
+    elif value_mg_dl < 350: return 2    # 1+
+    elif value_mg_dl < 750: return 3    # 2+
+    elif value_mg_dl < 1500: return 4   # 3+
+    else: return 5                       # 4+
+
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="CKD Predictor", page_icon="🩺", layout="wide")
 
@@ -113,33 +132,33 @@ st.sidebar.write("Enter the patient's details below:")
 def user_input_features():
     # Group 1: Demographics & Vitals
     with st.sidebar.expander("👤 Demographics & Vitals", expanded=True):
-        age = st.number_input("Age", min_value=1, max_value=100, value=60)
+        age = st.number_input("Age (years)", min_value=1, max_value=100, value=48)
         bp = st.number_input("Blood Pressure (mm/Hg)", min_value=50, max_value=180, value=80)
     
     # Group 2: Urinalysis
     with st.sidebar.expander("🧪 Urinalysis"):
-        sg = st.selectbox("Specific Gravity", [1.005, 1.010, 1.015, 1.020, 1.025], index=3)
-        al = st.selectbox("Albumin", [0, 1, 2, 3, 4, 5], index=0)
-        su = st.selectbox("Sugar", [0, 1, 2, 3, 4, 5], index=0)
-        rbc = st.selectbox("Red Blood Cells", ["normal", "abnormal"], index=0)
-        pc = st.selectbox("Pus Cell", ["normal", "abnormal"], index=0)
+        sg = st.number_input("Specific Gravity (ratio)", min_value=1.000, max_value=1.060, value=1.020, format="%.3f")
+        al = st.number_input("Albumin (mg/dL)", min_value=0.0, max_value=2000.0, value=0.0, step=10.0)
+        su = st.number_input("Sugar/Glucose (mg/dL)", min_value=0.0, max_value=3000.0, value=0.0, step=10.0)
+        rbc = st.selectbox("Red Blood Cells (urine)", ["normal", "abnormal"], index=0)
+        pc = st.selectbox("Pus Cell (cells/HPF)", ["normal", "abnormal"], index=0)
         pcc = st.selectbox("Pus Cell Clumps", ["notpresent", "present"], index=0)
         ba = st.selectbox("Bacteria", ["notpresent", "present"], index=0)
 
     # Group 3: Blood Chemistry
     with st.sidebar.expander("🩸 Blood Chemistry"):
-        bgr = st.number_input("Blood Glucose Random (mgs/dl)", value=121.0)
-        bu = st.number_input("Blood Urea (mgs/dl)", value=36.0)
-        sc = st.number_input("Serum Creatinine (mgs/dl)", value=1.2)
-        sod = st.number_input("Sodium (mEq/L)", value=135.0)
-        pot = st.number_input("Potassium (mEq/L)", value=4.0)
-        hemo = st.number_input("Hemoglobin (gms)", value=15.0)
+        bgr = st.number_input("Blood Glucose Random (mgs/dl)", value=100.0)
+        bu = st.number_input("Blood Urea (mgs/dl)", value=20.0)
+        sc = st.number_input("Serum Creatinine (mgs/dl)", value=1.0)
+        sod = st.number_input("Sodium (mEq/L)", value=138.0)
+        pot = st.number_input("Potassium (mEq/L)", value=4.5)
+        hemo = st.number_input("Hemoglobin (g/dL)", value=15.0)
 
     # Group 4: Blood Count
     with st.sidebar.expander("🔬 Blood Count"):
-        pcv = st.number_input("Packed Cell Volume", value=44.0)
-        wc = st.number_input("White Blood Cell Count", value=7800.0)
-        rc = st.number_input("Red Blood Cell Count", value=5.2)
+        pcv = st.number_input("Packed Cell Volume (%)", value=44.0)
+        wc = st.number_input("White Blood Cell Count (cells/μL)", value=7800.0)
+        rc = st.number_input("Red Blood Cell Count (million/μL)", value=5.2)
 
     # Group 5: Disease History
     with st.sidebar.expander("📋 Medical History"):
@@ -150,9 +169,14 @@ def user_input_features():
         pe = st.selectbox("Pedal Edema", ["yes", "no"], index=1)
         ane = st.selectbox("Anemia", ["yes", "no"], index=1)
 
-    # Dictionary of inputs
+
+    # Convert lab values to encoded grades for the model
+    al_grade = convert_albumin_to_grade(al)
+    su_grade = convert_sugar_to_grade(su)
+    
+    # Dictionary of inputs (using converted grades for al and su)
     data = {
-        'age': age, 'bp': bp, 'sg': sg, 'al': al, 'su': su,
+        'age': age, 'bp': bp, 'sg': sg, 'al': al_grade, 'su': su_grade,
         'bgr': bgr, 'bu': bu, 'sc': sc, 'sod': sod, 'pot': pot,
         'hemo': hemo, 'pcv': pcv, 'wc': wc, 'rc': rc,
         'rbc': rbc, 'pc': pc, 'pcc': pcc, 'ba': ba,

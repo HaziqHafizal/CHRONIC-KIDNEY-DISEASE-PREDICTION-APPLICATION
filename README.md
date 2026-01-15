@@ -10,7 +10,7 @@ This project is a bioinformatics application developed for the course **SECB3203
 
 The system is deployed as a user-friendly web application using **Streamlit**, allowing medical practitioners to input patient data and receive an instant diagnostic prediction with explainable AI insights.
 
-> **🔗 [View Live Application (Click Here)](https://chronic-kidney-disease-prediction-application.streamlit.app/)** > *(Note: Replace the link above with your actual deployment URL)*
+> **🔗 (https://chronic-kidney-disease-prediction-application.streamlit.app/)** 
 
 ---
 
